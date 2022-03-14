@@ -1,0 +1,88 @@
+version: "3.1"
+
+services:
+    app:
+        build:
+            context: ./service/app
+            dockerfile: Dockerfile.application
+        image: scaleflex:lastest
+        container_name: scaleflex_app
+        volumes:
+            - src:/ScaleFlex/
+        depends_on:
+            - db
+        restart: always
+        ports:
+            - "8000:8000"
+        networks:
+            - network_BE
+        command: bash -c "
+            cd /ScaleFlex/src/benchmark_pg
+            && cd /ScaleFlex/src/benchmark_pg
+            && gunicorn --workers=5 --threads=2 --bind 0.0.0.0:8000 benchmark_pg.wsgi"
+
+    db:
+        build:
+            context: ./service/postgres
+            dockerfile: Dockerfile.postgres
+        restart: always
+        environment:
+            POSTGRES_PASSWORD: root
+            POSTGRES_USER: root
+            PGDATA: /var/lib/postgresql/data
+
+        networks:
+            - network_BE
+        ports:
+            - "5432:5432"
+        volumes:
+            - db_mount:/var/lib/postgresql/data/
+            - db_mount_log:/var/log/postgresql/
+        command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
+
+    adminer:
+        image: adminer
+        restart: always
+        networks:
+            - network_BE
+        ports:
+            - 2221:8080
+
+    # nginx:
+    #     build:
+    #         context: ./service/nginx
+    #         dockerfile: Dockerfile.nginx
+    #     container_name: nginx
+    #     ports:
+    #         - 2904:80
+    #     depends_on:
+    #         - app
+    #     restart: always
+    #     networks:
+    #         - network_BE
+
+networks:
+    network_BE:
+        driver: bridge
+
+volumes:
+    src:
+        name: src
+        driver_opts:
+            type: "none"
+            device: "/home/lnhoang/Desktop/ScaleFlex"
+            o: bind
+    db_mount:
+        name: db_mount
+        driver_opts:
+            type: "none"
+            device: "/home/lnhoang/Desktop/ScaleFlex/db"
+            o: bind
+    db_mount_log:
+        name: db_mount_log
+        driver_opts:
+            type: "none"
+            device: "/home/lnhoang/Desktop/ScaleFlex/log/postgresql"
+            o: bind
+
+# docker-compose -p AVION_WEB up --build

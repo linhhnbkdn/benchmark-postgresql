@@ -1,0 +1,3 @@
+FROM postgres:10.4-alpine
+# RUN rm -rf /etc/postgresql/postgresql.conf
+# COPY postgres.conf /etc/postgresql/postgresql.conf
