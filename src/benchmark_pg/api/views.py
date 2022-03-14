@@ -34,4 +34,5 @@ def test_benchmark_pg(request, num_of_req):
     return JsonResponse({"min": min(result),
                          "max": max(result),
                          "mean": sum(result) / len(result),
-                         "total": timming_process})
+                         "total": timming_process,
+                         'num_of_req': num_of_req})
