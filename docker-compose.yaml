@@ -18,8 +18,7 @@ services:
             - network_BE
         command: bash -c "
             cd /ScaleFlex/src/benchmark_pg
-            && cd /ScaleFlex/src/benchmark_pg
-            && gunicorn --workers=5 --threads=2 --bind 0.0.0.0:8000 benchmark_pg.wsgi"
+            && gunicorn --workers=1 --threads=2 --bind 0.0.0.0:8000 benchmark_pg.wsgi"
 
     db:
         build:
@@ -48,6 +47,28 @@ services:
         ports:
             - 2221:8080
 
+    redis:
+        image: redis:6.2.6
+        restart: always
+        networks:
+            - network_BE
+
+    celery:
+        image: scaleflex:lastest
+        container_name: scaleflex_celery
+        depends_on:
+            - db
+            - redis
+            - app
+        volumes:
+            - src:/ScaleFlex/
+        restart: always
+        networks:
+            - network_BE
+        command: bash -c "
+                cd /ScaleFlex/src/benchmark_pg
+                && celery -A celery_conf worker -l INFO"
+
     # nginx:
     #     build:
     #         context: ./service/nginx
@@ -70,19 +91,19 @@ volumes:
         name: src
         driver_opts:
             type: "none"
-            device: "/home/lnhoang/Desktop/ScaleFlex"
+            device: "/home/lnhoang/Desktop/benchmark-postgresql"
             o: bind
     db_mount:
         name: db_mount
         driver_opts:
             type: "none"
-            device: "/home/lnhoang/Desktop/ScaleFlex/db"
+            device: "/home/lnhoang/Desktop/benchmark-postgresql/db"
             o: bind
     db_mount_log:
         name: db_mount_log
         driver_opts:
             type: "none"
-            device: "/home/lnhoang/Desktop/ScaleFlex/log/postgresql"
+            device: "/home/lnhoang/Desktop/benchmark-postgresql/log/postgresql"
             o: bind
 
 # docker-compose -p AVION_WEB up --build

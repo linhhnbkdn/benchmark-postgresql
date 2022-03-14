@@ -31,3 +31,5 @@ wheel==0.37.1
 yarg==0.1.9
 gunicorn
 pgcli
+Redis
+celery

@@ -20,5 +20,5 @@ from .views import test_benchmark_pg
 
 
 urlpatterns = [
-    path('test_benchmark_pg/', test_benchmark_pg, name='test_benchmark_pg'),
+    path('test_benchmark_pg/<int:num_of_req>', test_benchmark_pg, name='test_benchmark_pg'),
 ]
